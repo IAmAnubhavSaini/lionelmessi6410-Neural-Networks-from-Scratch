@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.datasets import fetch_openml
+from sklearn.datasets import fetch_openml as datasets
 import matplotlib.pyplot as plt
 import time
 import argparse
@@ -8,12 +8,12 @@ from model import DeepNeuralNetwork
 # Settings
 parser = argparse.ArgumentParser(description='Neural Networks from Scratch')
 parser.add_argument('--activation', action='store', dest='activation',
-                    required=False, default='sigmoid', help='activation function: sigmoid/relu')
+                    required=False, default='sigmoid', help='activation function: [ sigmoid | relu ]')
 parser.add_argument('--batch_size', action='store',
                     dest='batch_size', required=False, default=128)
 parser.add_argument('--optimizer', action='store', dest='optimizer',
-                    required=False, default='momentum', help='optimizer: sgd/momentum')
-parser.add_argument('--l_rate', action='store', dest='l_rate',
+                    required=False, default='momentum', help='optimizer: [ sgd | momentum ]')
+parser.add_argument('--learning-rate', action='store', dest='learning_rate',
                     required=False, default=1e-3, help='learning rate')
 parser.add_argument('--beta', action='store', dest='beta',
                     required=False, default=.9, help='beta in momentum optimizer')
@@ -38,15 +38,22 @@ def show_images(image, num_row=2, num_col=5):
 
 def one_hot(x, k, dtype=np.float32):
     """Create a one-hot encoding of x of size k."""
-    return np.array(x[:, None] == np.arange(k), dtype)
+    # x = np.array(x)
+    return np.array(x[:, None] == np.arange(k), dtype)  # erroring out
+    # return np.eye(k, dtype=dtype)[x]
 
 
 def main():
     # Load data
-    print("Loading data...")
-    mnist_data = fetch_openml("mnist_784")
+    print("Fetching and/or loading data...")
+    mnist_data = datasets("mnist_784")
     x = mnist_data["data"]
     y = mnist_data["target"]
+
+    print(type(x)) # <class 'pandas.core.frame.DataFrame'>
+    print(type(y)) # <class 'pandas.core.series.Series'>
+
+    # print(x, y)
 
     # Normalize
     print("Preprocessing data...")
@@ -72,7 +79,10 @@ def main():
     print("Start training!")
     dnn = DeepNeuralNetwork(sizes=[784, 64, 10], activation=args.activation)
     dnn.train(x_train, y_train, x_test, y_test,
-              batch_size=int(args.batch_size), optimizer=args.optimizer, l_rate=float(args.l_rate), beta=float(args.beta))
+              batch_size=int(args.batch_size),
+              optimizer=args.optimizer,
+              learning_rate=float(argsn.learing_rate),
+              beta=float(args.beta))
 
 
 if __name__ == '__main__':
