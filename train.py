@@ -38,8 +38,8 @@ def show_images(image, num_row=2, num_col=5):
 
 def one_hot(x, k, dtype=np.float32):
     """Create a one-hot encoding of x of size k."""
-    # x = np.array(x)
-    return np.array(x[:, None] == np.arange(k), dtype)  # erroring out
+    # x = np.asarray(x)
+    return np.array(np.asarray(x)[:, None] == np.arange(k), dtype)  # erroring out
     # return np.eye(k, dtype=dtype)[x]
 
 
@@ -70,7 +70,7 @@ def main():
     x_train, x_test = x[:train_size], x[train_size:]
     y_train, y_test = y_new[:train_size], y_new[train_size:]
     shuffle_index = np.random.permutation(train_size)
-    x_train, y_train = x_train[shuffle_index], y_train[shuffle_index]
+    x_train, y_train = x_train.reindex([shuffle_index]), y_train[shuffle_index]
     print("Training data: {} {}".format(x_train.shape, y_train.shape))
     print("Test data: {} {}".format(x_test.shape, y_test.shape))
 #     show_images(x_train)
@@ -81,7 +81,7 @@ def main():
     dnn.train(x_train, y_train, x_test, y_test,
               batch_size=int(args.batch_size),
               optimizer=args.optimizer,
-              learning_rate=float(argsn.learing_rate),
+              learning_rate=float(args.learning_rate),
               beta=float(args.beta))
 
 

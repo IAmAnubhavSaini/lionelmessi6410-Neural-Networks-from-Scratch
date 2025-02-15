@@ -101,7 +101,7 @@ class DeepNeuralNetwork():
             This is the backpropagation algorithm, for calculating the updates
             of the neural network's parameters.
 
-            Note: There is a stability issue that causes warnings. This is 
+            Note: There is a stability issue that causes warnings. This is
                   caused  by the dot and multiply operations on the huge arrays.
 
                   RuntimeWarning: invalid value encountered in true_divide
@@ -112,12 +112,12 @@ class DeepNeuralNetwork():
 
         dZ2 = output - y.T
         dW2 = (1./current_batch_size) * np.matmul(dZ2, self.cache["A1"].T)
-        db2 = (1./current_batch_size) * np.sum(dZ2, axis=1, keepdims=True)
+        db2 = (1./current_batch_size) * np.sum(dZ2, axis=1)
 
         dA1 = np.matmul(self.params["W2"].T, dZ2)
         dZ1 = dA1 * self.activation(self.cache["Z1"], derivative=True)
         dW1 = (1./current_batch_size) * np.matmul(dZ1, self.cache["X"])
-        db1 = (1./current_batch_size) * np.sum(dZ1, axis=1, keepdims=True)
+        db1 = (1./current_batch_size) * np.sum(dZ1, axis=1)
 
         self.grads = {"W1": dW1, "b1": db1, "W2": dW2, "b2": db2}
         return self.grads
@@ -131,7 +131,7 @@ class DeepNeuralNetwork():
         l = -(1./m) * l_sum
         return l
 
-    def optimize(self, l_rate=0.1, beta=.9):
+    def optimize(self, learning_rate=0.1, beta=.9):
         '''
             Stochatic Gradient Descent (SGD):
             θ^(t+1) <- θ^t - η∇L(y, ŷ)
@@ -142,13 +142,13 @@ class DeepNeuralNetwork():
         '''
         if self.optimizer == "sgd":
             for key in self.params:
-                self.params[key] = self.params[key] - l_rate * self.grads[key]
+                self.params[key] = self.params[key] - learning_rate * self.grads[key]
         elif self.optimizer == "momentum":
             for key in self.params:
                 self.momemtum_opt[key] = (
                     beta * self.momemtum_opt[key] + (1. - beta) * self.grads[key])
                 self.params[key] = self.params[key] - \
-                    l_rate * self.momemtum_opt[key]
+                    learning_rate * self.momemtum_opt[key]
         else:
             raise ValueError(
                 "Optimizer is currently not support, please use 'sgd' or 'momentum' instead.")
@@ -157,7 +157,7 @@ class DeepNeuralNetwork():
         return np.mean(np.argmax(y, axis=-1) == np.argmax(output.T, axis=-1))
 
     def train(self, x_train, y_train, x_test, y_test, epochs=10,
-              batch_size=64, optimizer='momentum', l_rate=0.1, beta=.9):
+              batch_size=64, optimizer='momentum', learning_rate=0.1, beta=.9):
         # Hyperparameters
         self.epochs = epochs
         self.batch_size = batch_size
@@ -175,7 +175,7 @@ class DeepNeuralNetwork():
         for i in range(self.epochs):
             # Shuffle
             permutation = np.random.permutation(x_train.shape[0])
-            x_train_shuffled = x_train[permutation]
+            x_train_shuffled = x_train.reindex([permutation])
             y_train_shuffled = y_train[permutation]
 
             for j in range(num_batches):
@@ -190,7 +190,7 @@ class DeepNeuralNetwork():
                 # Backprop
                 _ = self.back_propagate(y, output)
                 # Optimize
-                self.optimize(l_rate=l_rate, beta=beta)
+                self.optimize(learning_rate=learning_rate, beta=beta)
 
             # Evaluate performance
             # Training data
